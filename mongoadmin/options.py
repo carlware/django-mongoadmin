@@ -20,6 +20,8 @@ from mongodbforms.util import load_field_generator, init_document_options
 
 from mongoadmin.util import RelationWrapper, is_django_user_model
 from mongoadmin.widgets import ReferenceRawIdWidget, MultiReferenceRawIdWidget
+from mongoadmin.actions import delete_selected
+from bson.errors import InvalidId
 
 # Defaults for formfield_overrides. ModelAdmin subclasses can change this
 # by adding to ModelAdmin.formfield_overrides.
@@ -156,6 +158,8 @@ class MongoFormFieldMixin(object):
 
 class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
     change_list_template = "admin/change_document_list.html"
+    change_form_template = "admin/mongo_change_form.html"
+    actions = (delete_selected,)
     form = DocumentForm
 
     _embedded_inlines = None
@@ -248,7 +252,7 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
         try:
             object_id = model._meta.pk.to_python(object_id)
             return queryset.get(pk=object_id)
-        except (model.DoesNotExist, ValidationError, ValueError):
+        except (model.DoesNotExist, ValidationError, ValueError,InvalidId):
             return None
 
     def get_form(self, request, obj=None, **kwargs):
