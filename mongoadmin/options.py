@@ -23,6 +23,16 @@ from mongoadmin.widgets import ReferenceRawIdWidget, MultiReferenceRawIdWidget
 from mongoadmin.actions import delete_selected
 from bson.errors import InvalidId
 
+
+# TODO: move it and performs validation
+from django.contrib.admin import validation
+
+
+class Validator(validation.BaseValidator):
+
+	def validate_filter_horizontal(self, cls, model):
+		pass
+
 # Defaults for formfield_overrides. ModelAdmin subclasses can change this
 # by adding to ModelAdmin.formfield_overrides.
 FORMFIELD_FOR_DBFIELD_DEFAULTS = {
@@ -161,6 +171,7 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
     change_form_template = "admin/mongo_change_form.html"
     actions = (delete_selected,)
     form = DocumentForm
+    validator_class = Validator
 
     _embedded_inlines = None
 
