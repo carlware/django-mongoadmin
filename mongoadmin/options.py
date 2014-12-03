@@ -351,6 +351,33 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
 
         super(DocumentAdmin, self).log_deletion(request=request, object=object, object_repr=object_repr)
 
+    def construct_change_message(self, request, form, formsets):
+        """
+        Construct a change message from a changed object.
+        """
+        change_message = []
+        if form.changed_data:
+            change_message.append(_('Changed %s.') % get_text_list(form.changed_data, _('and')))
+
+        # todo: this must be changed accordingly with mongoengine
+        # if formsets:
+        #     for formset in formsets:
+        #         for added_object in formset.new_objects:
+        #             change_message.append(_('Added %(name)s "%(object)s".')
+        #                                   % {'name': force_text(added_object._meta.verbose_name),
+        #                                      'object': force_text(added_object)})
+        #         for changed_object, changed_fields in formset.changed_objects:
+        #             change_message.append(_('Changed %(list)s for %(name)s "%(object)s".')
+        #                                   % {'list': get_text_list(changed_fields, _('and')),
+        #                                      'name': force_text(changed_object._meta.verbose_name),
+        #                                      'object': force_text(changed_object)})
+        #         for deleted_object in formset.deleted_objects:
+        #             change_message.append(_('Deleted %(name)s "%(object)s".')
+        #                                   % {'name': force_text(deleted_object._meta.verbose_name),
+        #                                      'object': force_text(deleted_object)})
+        change_message = ' '.join(change_message)
+        return change_message or _('No fields changed.')
+
 class EmbeddedInlineAdmin(MongoFormFieldMixin, InlineModelAdmin):
     parent_field_name = None
     formset = EmbeddedDocumentFormSet
