@@ -170,7 +170,6 @@ class MongoFormFieldMixin(object):
 class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
     change_list_template = "admin/change_document_list.html"
     change_form_template = "admin/mongo_change_form.html"
-    actions = (delete_selected,)
     form = DocumentForm
     validator_class = Validator
 

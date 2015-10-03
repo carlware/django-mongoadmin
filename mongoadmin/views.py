@@ -78,6 +78,8 @@ class DocumentChangeList(ChangeList):
                     continue # Invalid ordering specified, skip it.
 
         # Add the given query's ordering fields, if any.
+        if queryset._ordering is None:
+            queryset._ordering = []
         ordering.extend(queryset._ordering)
 
         # Ensure that the primary key is systematically present in the list of
