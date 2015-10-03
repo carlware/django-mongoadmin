@@ -15,7 +15,8 @@ from django.utils.text import get_text_list
 from mongoengine.fields import (DateTimeField, URLField, IntField, ListField, EmbeddedDocumentField,
                                 ReferenceField, StringField, FileField, ImageField)
 
-from mongodbforms.documents import documentform_factory, embeddedformset_factory, DocumentForm, EmbeddedDocumentFormSet, EmbeddedDocumentForm
+from mongodbforms.documents import (documentformset_factory, documentform_factory, embeddedformset_factory,
+                                    DocumentForm, EmbeddedDocumentFormSet, EmbeddedDocumentForm)
 from mongodbforms.util import load_field_generator, init_document_options
 
 from mongoadmin.util import RelationWrapper, is_django_user_model
@@ -251,6 +252,34 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
         """
         from mongoadmin.views import DocumentChangeList
         return DocumentChangeList
+
+    def get_changelist_form(self, request, **kwargs):
+        """
+        Returns a Form class for use in the Formset on the changelist page.
+        """
+        defaults = {
+            "formfield_callback": partial(self.formfield_for_dbfield, request=request),
+        }
+        defaults.update(kwargs)
+        if (defaults.get('fields') is None
+                and not modelform_defines_fields(defaults.get('form'))):
+            all_fields = self.model._fields.keys()
+            defaults['fields'] = all_fields
+
+        return documentform_factory(self.model, **defaults)
+
+    def get_changelist_formset(self, request, **kwargs):
+        """
+        Returns a FormSet class for use on the changelist page if list_editable
+        is used.
+        """
+        defaults = {
+            "formfield_callback": partial(self.formfield_for_dbfield, request=request),
+        }
+        defaults.update(kwargs)
+        return documentformset_factory(self.model,
+            self.get_changelist_form(request), extra=0,
+            fields=self.list_editable, **defaults)
 
     def get_object(self, request, object_id):
         """
