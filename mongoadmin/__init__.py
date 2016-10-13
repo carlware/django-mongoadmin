@@ -11,4 +11,5 @@ if getattr(settings, 'MONGOADMIN_OVERRIDE_ADMIN', False):
     # don't show up in the new admin
     site._registry = django.contrib.admin.site._registry
     
-    django.contrib.admin.site = site 
+    django.contrib.admin.site = site
+    django.contrib.admin.sites.site = site

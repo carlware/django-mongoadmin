@@ -5,7 +5,7 @@ Built-in, globally-available admin actions.
 from django import template
 from django.core.exceptions import PermissionDenied
 from django.contrib.admin import helpers
-from django.contrib.admin.util import get_deleted_objects, model_ngettext
+from django.contrib.admin.utils import get_deleted_objects, model_ngettext
 from django.db import router
 from django.shortcuts import render_to_response
 try:
@@ -45,8 +45,6 @@ def _delete_selected(modeladmin, request, queryset):
     # Populate deletable_objects, a data structure of all related objects that
     # will also be deleted.
     # TODO: Permissions would be so cool...
-    # TODO: PATCH: avioiding key error
-    # modeladmin.model._meta['virtual_fields'] = []
     deletable_objects, perms_needed, protected = get_deleted_objects(
         queryset, opts, request.user, modeladmin.admin_site, using)
 
@@ -93,7 +91,6 @@ def _delete_selected(modeladmin, request, queryset):
         "perms_lacking": perms_needed,
         "protected": protected,
         "opts": opts,
-        # "root_path": modeladmin.admin_site.root_path,
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
     }

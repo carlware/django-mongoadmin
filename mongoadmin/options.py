@@ -5,34 +5,22 @@ from django import forms
 from django.forms.models import modelform_defines_fields
 from django.contrib.admin.options import ModelAdmin, InlineModelAdmin, get_ul_class
 from django.contrib.admin import widgets
-from django.contrib.admin.util import flatten_fieldsets
+from django.contrib.admin.options import flatten_fieldsets, NestedObjects
 from django.core.exceptions import FieldError, ValidationError
 from django.forms.formsets import DELETION_FIELD_NAME
 from django.utils.translation import ugettext as _
-from django.contrib.admin.util import NestedObjects
 from django.utils.text import get_text_list
 
 from mongoengine.fields import (DateTimeField, URLField, IntField, ListField, EmbeddedDocumentField,
                                 ReferenceField, StringField, FileField, ImageField)
 
-from mongodbforms.documents import (documentformset_factory, documentform_factory, embeddedformset_factory,
-                                    DocumentForm, EmbeddedDocumentFormSet, EmbeddedDocumentForm)
+from mongodbforms.documents import (documentform_factory, embeddedformset_factory, DocumentForm,
+                                    EmbeddedDocumentFormSet, EmbeddedDocumentForm)
 from mongodbforms.util import load_field_generator, init_document_options
 
 from mongoadmin.util import RelationWrapper, is_django_user_model
 from mongoadmin.widgets import ReferenceRawIdWidget, MultiReferenceRawIdWidget
-from mongoadmin.actions import delete_selected
-from bson.errors import InvalidId
 
-
-# TODO: move it and performs validation
-from django.contrib.admin import validation
-
-
-class Validator(validation.BaseValidator):
-
-	def validate_filter_horizontal(self, cls, model):
-		pass
 
 # Defaults for formfield_overrides. ModelAdmin subclasses can change this
 # by adding to ModelAdmin.formfield_overrides.
@@ -171,7 +159,6 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
     change_list_template = "admin/change_document_list.html"
     change_form_template = "admin/mongo_change_form.html"
     form = DocumentForm
-    validator_class = Validator
 
     _embedded_inlines = None
 
@@ -252,35 +239,7 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
         from mongoadmin.views import DocumentChangeList
         return DocumentChangeList
 
-    def get_changelist_form(self, request, **kwargs):
-        """
-        Returns a Form class for use in the Formset on the changelist page.
-        """
-        defaults = {
-            "formfield_callback": partial(self.formfield_for_dbfield, request=request),
-        }
-        defaults.update(kwargs)
-        if (defaults.get('fields') is None
-                and not modelform_defines_fields(defaults.get('form'))):
-            all_fields = self.model._fields.keys()
-            defaults['fields'] = all_fields
-
-        return documentform_factory(self.model, **defaults)
-
-    def get_changelist_formset(self, request, **kwargs):
-        """
-        Returns a FormSet class for use on the changelist page if list_editable
-        is used.
-        """
-        defaults = {
-            "formfield_callback": partial(self.formfield_for_dbfield, request=request),
-        }
-        defaults.update(kwargs)
-        return documentformset_factory(self.model,
-            self.get_changelist_form(request), extra=0,
-            fields=self.list_editable, **defaults)
-
-    def get_object(self, request, object_id):
+    def get_object(self, request, object_id, from_field=None):
         """
         Returns an instance matching the primary key provided. ``None``  is
         returned if no match is found (or the object_id failed validation
@@ -291,7 +250,7 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
         try:
             object_id = model._meta.pk.to_python(object_id)
             return queryset.get(pk=object_id)
-        except (model.DoesNotExist, ValidationError, ValueError,InvalidId):
+        except (model.DoesNotExist, ValidationError, ValueError):
             return None
 
     def get_form(self, request, obj=None, **kwargs):
@@ -326,11 +285,9 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
         if defaults['fields'] is None and not modelform_defines_fields(defaults['form']):
             defaults['fields'] = None
 
-        print(defaults)
         try:
             return documentform_factory(self.model, **defaults)
         except FieldError as e:
-            print(e.message)
             raise FieldError('%s. Check fields/fieldsets/exclude attributes of class %s.'
                              % (e, self.__class__.__name__))
 
@@ -379,32 +336,6 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
 
         super(DocumentAdmin, self).log_deletion(request=request, object=object, object_repr=object_repr)
 
-    def construct_change_message(self, request, form, formsets):
-        """
-        Construct a change message from a changed object.
-        """
-        change_message = []
-        if form.changed_data:
-            change_message.append(_('Changed %s.') % get_text_list(form.changed_data, _('and')))
-
-        # todo: this must be changed accordingly with mongoengine
-        # if formsets:
-        #     for formset in formsets:
-        #         for added_object in formset.new_objects:
-        #             change_message.append(_('Added %(name)s "%(object)s".')
-        #                                   % {'name': force_text(added_object._meta.verbose_name),
-        #                                      'object': force_text(added_object)})
-        #         for changed_object, changed_fields in formset.changed_objects:
-        #             change_message.append(_('Changed %(list)s for %(name)s "%(object)s".')
-        #                                   % {'list': get_text_list(changed_fields, _('and')),
-        #                                      'name': force_text(changed_object._meta.verbose_name),
-        #                                      'object': force_text(changed_object)})
-        #         for deleted_object in formset.deleted_objects:
-        #             change_message.append(_('Deleted %(name)s "%(object)s".')
-        #                                   % {'name': force_text(deleted_object._meta.verbose_name),
-        #                                      'object': force_text(deleted_object)})
-        change_message = ' '.join(change_message)
-        return change_message or _('No fields changed.')
 
 class EmbeddedInlineAdmin(MongoFormFieldMixin, InlineModelAdmin):
     parent_field_name = None

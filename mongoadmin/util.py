@@ -28,15 +28,6 @@ class RelationWrapper(object):
     def __init__(self, document):
         self.to = init_document_options(document)
 
-    def get_related_field(self):
-        # TODO: check it. This seems to work is dummy.
-        # print "######### REAL"
-        # print self.to
-        def dummy():
-            pass
-        dummy.name = ''
-        return dummy
-
         
 def is_django_user_model(user):
     """
