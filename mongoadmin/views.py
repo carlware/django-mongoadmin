@@ -3,7 +3,9 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.core.paginator import InvalidPage
 
+
 class DocumentChangeList(ChangeList):
+
     def get_queryset(self, request):
         # First, we collect all the declared list filters.
         (self.filter_specs, self.has_filters, remaining_lookup_params,
@@ -124,3 +126,7 @@ class DocumentChangeList(ChangeList):
         self.can_show_all = can_show_all
         self.multi_page = multi_page
         self.paginator = paginator
+
+    def has_related_field_in_list_display(self):
+        # TODO: pending implementation related field (mongo reference field)
+        return super(DocumentChangeList, self).has_related_field_in_list_display()

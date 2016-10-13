@@ -13,3 +13,6 @@ if getattr(settings, 'MONGOADMIN_OVERRIDE_ADMIN', False):
     
     django.contrib.admin.site = site
     django.contrib.admin.sites.site = site
+
+
+default_app_config = "mongoadmin.apps.MongoAdminConfig"

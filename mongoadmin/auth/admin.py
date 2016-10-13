@@ -21,8 +21,8 @@ from mongoengine import DoesNotExist
 from mongoengine.django.mongo_auth.models import MongoUser
 
 from mongoadmin import site, DocumentAdmin
-
 from .forms import UserCreationForm, UserChangeForm
+
 
 class MongoUserAdmin(DocumentAdmin):
     add_form_template = 'admin/auth/user/add_form.html'

@@ -2,6 +2,7 @@ from django.contrib.admin.helpers import InlineAdminForm as DjangoInlineAdminFor
 from django.contrib.admin.helpers import InlineAdminFormSet as DjangoInlineAdminFormSet
 from django.contrib.admin.helpers import AdminForm
 
+
 class InlineAdminFormSet(DjangoInlineAdminFormSet):
     """
     A wrapper around an inline formset for use in the admin system.
@@ -18,7 +19,6 @@ class InlineAdminFormSet(DjangoInlineAdminFormSet):
         yield InlineAdminForm(self.formset, self.formset.empty_form,
             self.fieldsets, self.opts.prepopulated_fields, None,
             self.readonly_fields, model_admin=self.opts)
-
 
 
 class InlineAdminForm(DjangoInlineAdminForm):

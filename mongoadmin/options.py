@@ -37,6 +37,7 @@ FORMFIELD_FOR_DBFIELD_DEFAULTS = {
 
 _fieldgenerator = load_field_generator()()
 
+
 def formfield(field, form_class=None, **kwargs):
     """
     Returns a django.forms.Field instance for this database Field.
@@ -67,6 +68,7 @@ def formfield(field, form_class=None, **kwargs):
 
 
 class MongoFormFieldMixin(object):
+
     def formfield_for_dbfield(self, db_field, **kwargs):
         """
         Hook for specifying the form Field instance for a given database Field
@@ -231,6 +233,10 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
         if ordering:
             qs = qs.order_by(*ordering)
         return qs
+    
+    def get_field_queryset(self, db, db_field, request):
+        # TODO: fix remote_field for django 1.10
+        return super(DocumentAdmin, self).get_field_queryset(db, db_field, request)
 
     def get_changelist(self, request, **kwargs):
         """

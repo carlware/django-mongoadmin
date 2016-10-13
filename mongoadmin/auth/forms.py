@@ -3,8 +3,8 @@ from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
 from mongoengine.django.auth import User
-
 from mongodbforms import DocumentForm
+
 
 class UserCreationForm(DocumentForm):
     """
