@@ -20,13 +20,20 @@ from mongoengine import fields
 from mongodbforms.util import init_document_options
 import collections
 
+
 class RelationWrapper(object):
     """
-    Wraps a document referenced from a ReferenceField with an Interface similiar to
+    Wraps a document referenced from a ReferenceField with an Interface similar to
     django's ForeignKeyField.rel 
     """
-    def __init__(self, document):
+    def __init__(self, document, related_field=None):
         self.to = init_document_options(document)
+        # for django 1.10
+        self.model = self.to
+        self.related_field = related_field
+
+    def get_related_field(self):
+        return self.related_field
 
         
 def is_django_user_model(user):

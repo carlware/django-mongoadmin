@@ -98,7 +98,7 @@ class MongoFormFieldMixin(object):
                 can_add_related = bool(related_modeladmin and
                             related_modeladmin.has_add_permission(request))
                 form_field.widget = widgets.RelatedFieldWidgetWrapper(
-                            form_field.widget, RelationWrapper(db_field.document_type), self.admin_site,
+                            form_field.widget, RelationWrapper(db_field.document_type, db_field), self.admin_site,
                             can_add_related=can_add_related)
                 return form_field
             elif db_field.name in self.raw_id_fields:
@@ -165,6 +165,7 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
     _embedded_inlines = None
 
     def __init__(self, model, admin_site):
+        # TODO: add inline options for embedded documents
         super(DocumentAdmin, self).__init__(model, admin_site)
 
         self.inlines = self._find_embedded_inlines()
