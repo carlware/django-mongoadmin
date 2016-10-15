@@ -309,7 +309,7 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)
 
-    def log_addition(self, request, object):
+    def log_addition(self, request, object, message=None):
         """
         Log that an object has been successfully added.
 
@@ -318,7 +318,11 @@ class DocumentAdmin(MongoFormFieldMixin, ModelAdmin):
         if not is_django_user_model(request.user):
             return
 
-        super(DocumentAdmin, self).log_addition(request=request, object=object)
+        # compatibility with django < 1.10
+        if message is None:
+            super(DocumentAdmin, self).log_addition(request=request, object=object)
+        else:
+            super(DocumentAdmin, self).log_addition(request=request, object=object, message=message)
 
 
     def log_change(self, request, object, message):
